@@ -13,7 +13,7 @@ class node(object):
 
 class graph(object):
 
-	def __init__(self,object, nodes):
+	def __init__(self, nodes:list):
 		queue = []
 		explored = []
 		nodes = self.nodes
