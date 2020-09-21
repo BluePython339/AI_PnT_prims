@@ -14,28 +14,34 @@ class node(object):
 class graph(object):
 
 	def __init__(self, nodes:list):
-		queue = []
-		explored = []
-		nodes = self.nodes
+		self.queue = []
+		self.explored = []
+		self.nodes = nodes
 
 	def prims(self):
 		#get initial node
 		node = self.nodes.pop()
 		self.explored.append(node.name)
 		for i in node.get_neighbours():
-			heappush(self.queue, i)
+			heapq.heappush(self.queue, i)
 		#add name and weight to queue
 		#continue loop
-		while len(explored) not len(nodes):
-			node = heappop(self.queue) # we need a way to remove an item from the queue if its node has been explored
+		while len(self.explored) < len(self.nodes):
+			node = heapq.heappop(self.queue) # we need a way to remove an item from the queue if its node has been explored
 			for i in node.get_neighbours():
-				heappush(self.queue, i)
+				heapq.heappush(self.queue, i)
 
 			#implement some logging system to return the MST
 
-	def show_mst():
-		pass
+	def show_mst(self):
+		print(self.nodes)
 		#make a representation of the mst
+
+nodeA = node([node([], "nodeB")], "nodeA") #A node nodeA with 1 neighbour nodeB
+print(nodeA.name, nodeA.neighbours[0].name)
+gr = graph([nodeA])
+print(gr.nodes[0].name)
+gr.prims()
 
 #@TODO -input graph method
 # 	   -finnish implementing prims
