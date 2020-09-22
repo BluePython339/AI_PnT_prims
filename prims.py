@@ -1,44 +1,48 @@
 import heapq
+import sys
+
+MAX_INT = sys.MAX_INT
+
+#  1 2 3 4 
+#1 0 
+#2 1 0
+#3 3
+#4 4
 
 class node(object):
 
-	def __init__(self, neighbours:list, name:str):
-		self.name = name
-		self.neighbours = neighbours #[8, "A"]
+	def __init__(self, node):
+		node = node
+		key = MAX_INT
+		parent = -1
 
 
-	def get_neighbours(self):
-		return self.neighbours #returns all neighbours
+class matrix(object):
 
+	def __init__(self, matrix:list ):
+		self.adj = matrix
 
-class graph(object):
+	def get_weight(u,v):
+		return matrix[u][v]
 
-	def __init__(self, nodes:list):
-		queue = []
-		explored = []
-		nodes = self.nodes
+	def get_adj(u):
+		nodes = []
+		for i in self.adj[u]:
+			if i > 0:
+				nodes.append(i)
+		return nodes
 
-	def prims(self):
-		#get initial node
-		node = self.nodes.pop()
-		self.explored.append(node.name)
-		for i in node.get_neighbours():
-			heappush(self.queue, i)
-		#add name and weight to queue
-		#continue loop
-		while len(explored) not len(nodes):
-			node = heappop(self.queue) # we need a way to remove an item from the queue if its node has been explored
-			for i in node.get_neighbours():
-				heappush(self.queue, i)
+def MST_PRIM(G:matrix , r:int):
+	Q = []
+	for u in G.adj:
+		Q.append(node(u))
+	Q[r].key = 0
+	while Q:
+		u = min(Q, key=key)
+		Q.remove(u)
+		for v in G.get_adj():
+			for i in Q:
+				if v == i.node and i.key > G.get_weight(u.node,v):
+					i.parent = u.node
+					i.key = G.get_weight(u.node,v)
 
-			#implement some logging system to return the MST
-
-	def show_mst():
-		pass
-		#make a representation of the mst
-
-#@TODO -input graph method
-# 	   -finnish implementing prims
-#      -optimise
-#      -create GML parser to graph
-#      -create random graph creator
