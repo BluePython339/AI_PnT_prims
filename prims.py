@@ -1,4 +1,4 @@
-import heapq
+import heapq as h
 import sys
 
 MAX_INT = 9223372036854775807
@@ -12,12 +12,16 @@ MAX_INT = 9223372036854775807
 
 class node(object):
 
-	def __init__(self, node):
+	def __init__(self, node, key):
 		self.node = node
-		self.key = MAX_INT
+		self.key = key
 		self.parent = None
 
-	def get_key(self): return self.key
+	def get_key(self): 
+		return self.key
+
+	def __lt__(self, other):
+		return self.key < other.key
 
 
 class matrix(object):
@@ -40,17 +44,19 @@ def MST_PRIM(G:matrix , r:int):
 	mst = []
 	Q = []
 	for i in range(len(G.adj)):
-		Q.append(node(i))
-	Q[r].key = 0
+		if i  == r:
+			h.heappush(Q,node(i, 0))
+		else:
+			h.heappush(Q, node(i, MAX_INT))
 	while Q:
-		u = min(Q, key=lambda k: k.key)
+		u = h.heappop(Q)
 		for v in G.get_adj(u.node):
 			for i in Q:
 				if v == i.node and i.key > G.get_weight(u.node, v):
 					i.parent = u.node
 					i.key = G.get_weight(u.node, v)
 		mst.append(u)
-		Q.remove(u)
+		h.heapify(Q)
 	return mst
 
 
