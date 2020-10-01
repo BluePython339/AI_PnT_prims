@@ -1,6 +1,7 @@
 import heapq as h
 import sys
 import numpy as np
+import random
 
 MAX_INT = 9223372036854775807
 
@@ -60,14 +61,14 @@ def MST_PRIM(G:matrix , r:int):
 		h.heapify(Q)
 	return mst
 
-def random_graph(vertices, edges, weight_min, weight_max):
-	gr = np.array(np.zeros(vertices**2)).reshape(vertices, vertices)
+def random_graph(vertices:int, min:int, max:int):
+	gr = np.array(np.zeros(vertices**2)).reshape(vertices,vertices)
 	for i in range(vertices):
 		for j in range(vertices):
 			if i != j:
 				weight = np.random.randint(weight_min, weight_max+1)
-				gr[i, j] = weight
-				gr[j, i] = weight
+				gr[i, j] = random.choice([weight,weight, -1])
+				gr[j, i] = random.choice([weight,weight, -1])
 	return matrix(gr)
 
 
