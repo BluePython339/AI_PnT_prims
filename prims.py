@@ -61,16 +61,37 @@ def MST_PRIM(G:matrix , r:int):
 		h.heapify(Q)
 	return mst
 
-def random_graph(vertices:int, min:int, max:int):
-	gr = np.array(np.zeros(vertices**2)).reshape(vertices,vertices)
-	for i in range(vertices):
-		for j in range(vertices):
-			if i != j:
-				weight = np.random.randint(weight_min, weight_max+1)
-				gr[i, j] = random.choice([weight,weight, -1])
-				gr[j, i] = random.choice([weight,weight, -1])
-	return matrix(gr)
 
+def random_graph(vertices:int, edges:int, min_w:int, max_w:int)-> matrix:
+	if (edges >= vertices*vertices) or (edges < (vertices-1)) or (min_w <= 0) or (max_w <= min_w):
+		return [[0,0]]
+
+	gr = np.array(np.zeros(vertices**2)).reshape(vertices,vertices)
+	placed = []
+	for a in range(edges):
+		i = random.choice([i for i in range(vertices)])
+		j = random.choice([i for i in range(vertices)])
+		if (i != j) or ((i,j) in placed):
+			gr[i j] = np.random.randint(min_w, max_w+1)
+		edges -= 1
+
+	for  i in range(vertices):
+		if sum(gr[i]) <= len(j-1)*-1:
+			edges -= 1
+			randpos = i
+			while randpos == i:
+				randpos = np.random.randint(0, vertices+1)
+			gr[i randpos] = np.random.randint(min_w, max_w+1)
+
+	while edges < 0:
+		i = np.random.randint(0,vertices+1)
+		if (sum(gr[i]) >= max_w) and edges < 0: #pretty much means that it has more than 1 connection
+			edges += 1
+			while randpos == i:
+				randpos = np.random.randint(0, vertices+1)
+			gr[i randpos] = -1
+
+	return matrix(gr)
 
 root = 1
 
