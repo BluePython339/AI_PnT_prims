@@ -75,11 +75,11 @@ def MST_PRIM(G: matrix, r: int):
             h.heappush(Q, node(i, MAX_INT))
     while Q:
         u = h.heappop(Q)
-        #test = "current pick: {}"
-        #print(test.format(u))
-        #for i in Q:
-        #    print(i)
-        #print("___________________________________")
+        test = "current pick: {}"
+        print(test.format(u))
+        for i in Q:
+            print(i)
+        print("___________________________________")
         for v in G.get_adj(u.node):
             for i in Q:
                 if v == i.node and i.key > G.get_weight(u.node, v):
@@ -134,24 +134,35 @@ def random_graph(vertices: int, edges: int, min_w: int, max_w: int) -> matrix:
             randpos = i
             while randpos == i:
                 randpos = np.random.randint(0, vertices)
-            gr[i, randpos] = np.random.randint(min_w, max_w + 1)
+            weight = np.random.randint(min_w, max_w + 1)
+            gr[i, randpos] = weight 
+            gr[randpos, i] = weight
     for i in range(vertices):
         check = 0
         for j in range(vertices):
             check +=gr[j,i]
         if check <= (vertices - 1)*-1:
             edges -= 1 #found another disconnection
+            weight = np.random.randint(min_w, max_w + 1)
+            randpos = np.random.randint(0, vertices)
+            gr[j, randpos] = weight
+            gr[randpos, j] = weight
 
         #check for filtering out disconnected nodes, (at least most of them)
         #this does not account for disconnected graphs (since it can't find those)
 
     while edges < 0:
         i = np.random.randint(0, vertices)
-        if (sum(gr[i]) >= max_w) and edges < 0:  # pretty much means that it has more than 1 connection
+        count =0
+        for j in gr[i]:
+            if j > -1:
+                count += 1
+        if (count > 3) and edges < 0:  # pretty much means that it has more than 1 connection
             edges += 1
             while randpos == i:
                 randpos = np.random.randint(0, vertices)
             gr[i, randpos] = -1
+            gr[randpos, i] = -1
         #here we need to remove extra edges from well connected vertices to get the required graph 
     end_time = time.time()
     times.append((start_time, end_time))
