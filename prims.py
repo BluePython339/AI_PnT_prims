@@ -190,7 +190,10 @@ def load_graph(filename:str):
         if "edge [" in data[i]:
             s = int(data[i+1].split()[1])
             t = int(data[i+2].split()[1])
-            w = int(data[i+3].split()[1].strip('"').strip("'"))
+            try:
+                w = int(data[i+3].split()[1].strip('"').strip("'"))
+            except:
+                w = 1
             edges.append((s, t, w))
 
     gr = np.array(np.zeros(len(nodes) ** 2)).reshape(len(nodes), len(nodes))
