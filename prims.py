@@ -72,24 +72,24 @@ def MST_PRIM(G: matrix, r: int):
     Q = []
     for i in range(len(G.adj)):
         if i == r:
-            h.heappush(Q, node(i, 0))
+            h.heappush(Q, node(i, 0))  # If root, add to queue with key 1
         else:
-            h.heappush(Q, node(i, MAX_INT))
-    while Q:
-        u = h.heappop(Q)
-        if verbose:
+            h.heappush(Q, node(i, MAX_INT))  # Else add to queue with inf key
+    while Q:  # Until the queue is empty
+        u = h.heappop(Q)  # Take node with lowest key in Q
+        if verbose:  # Extra prints for debugging
             print("___________________________________")
             test = "current pick: {}"
             print(test.format(u))
             for i in Q:
                 print(i)
             print("___________________________________\n")
-        for v in G.get_adj(u.node):
+        for v in G.get_adj(u.node):  # For each neighbour of u
             for i in Q:
-                if v == i.node and i.key > G.get_weight(u.node, v):
-                    i.parent = u.node
-                    i.key = G.get_weight(u.node, v)
-        mst.append(u)
+                if v == i.node and i.key > G.get_weight(u.node, v):  # If the cost of getting to v from u is smaller
+                    i.parent = u.node                                # than the key of this v, set v's parent to u and
+                    i.key = G.get_weight(u.node, v)                  # set the new key to the lower cost
+        mst.append(u)  # Add u (with the potential new connections) to the expanding MST
         h.heapify(Q)
     end_time = time.time()
     times.append((start_time, end_time))
@@ -191,7 +191,7 @@ def load_graph(filename:str):
             s = int(data[i+1].split()[1])
             t = int(data[i+2].split()[1])
             w = int(data[i+3].split()[1].strip('"').strip("'"))
-            edges.append((s,t,w))
+            edges.append((s, t, w))
 
     gr = np.array(np.zeros(len(nodes) ** 2)).reshape(len(nodes), len(nodes))
     for i in edges:
