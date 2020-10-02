@@ -16,6 +16,7 @@ parser.add_argument("--max",type=int, default=0,help="maximal edge weight")
 parser.add_argument('--root', type=int,default = 1, help="set root node of graph")
 parser.add_argument('-f', '--file',type=str, help="read graph from GML file")
 parser.add_argument('-rf','--random_full', default=False, action='store_true', help="create random STRONGLY CONNECTED graph, needs -v, --min and --max")
+parser.add_argument('-vv', '--verbose', default=False, action='store_true', help="show steps of the algorithm, this will effect the runtime escpecially on large graphs")
 #  1 2 3 4 
 # 1 0
 # 2 1 0
@@ -24,6 +25,7 @@ parser.add_argument('-rf','--random_full', default=False, action='store_true', h
 times = []
 start_time = 0
 end_time = 0
+verbose = False
 
 class node(object):
 
@@ -75,11 +77,13 @@ def MST_PRIM(G: matrix, r: int):
             h.heappush(Q, node(i, MAX_INT))
     while Q:
         u = h.heappop(Q)
-        test = "current pick: {}"
-        print(test.format(u))
-        for i in Q:
-            print(i)
-        print("___________________________________")
+        if verbose:
+            print("___________________________________")
+            test = "current pick: {}"
+            print(test.format(u))
+            for i in Q:
+                print(i)
+            print("___________________________________\n")
         for v in G.get_adj(u.node):
             for i in Q:
                 if v == i.node and i.key > G.get_weight(u.node, v):
@@ -92,6 +96,9 @@ def MST_PRIM(G: matrix, r: int):
     return mst
 
 def fully_connected(vertices:int, min_w:int, max_w:int)->matrix:
+    if(min_w <= 1 or max_w > MAX_INT):
+        print('faulty parameters')
+        exit()
     start_time = time.time()
     gr = np.array(np.zeros(vertices ** 2)).reshape(vertices, vertices) #create and fill the matrix with 0
     gr.fill(-1)
@@ -108,8 +115,9 @@ def fully_connected(vertices:int, min_w:int, max_w:int)->matrix:
 
 def random_graph(vertices: int, edges: int, min_w: int, max_w: int) -> matrix:
     start_time = time.time()
-    if (edges >= vertices * vertices) or (edges < (vertices - 1)) or (min_w <= 0) or (max_w <= min_w):
-        return [[0]]
+    if (edges >= vertices * vertices) or (edges < (vertices - 1)) or (min_w <= 0):
+        print('faulty parameters')
+        exit()
 
     gr = np.array(np.zeros(vertices ** 2)).reshape(vertices, vertices) #create and fill the matrix with 0
     gr.fill(-1) #fill the matrix with -1 (our representation of not connected)
@@ -169,32 +177,30 @@ def random_graph(vertices: int, edges: int, min_w: int, max_w: int) -> matrix:
     return matrix(gr)
 
 
-def load_graph(filename: str):
-    n_nodes = 0
+def load_graph(filename:str):
+    start_time = time.time()
+    nodes = []
     edges = []
-    file = open(filename, 'r')
-    line = file.readline()
-    while line:
-        tag = line.split()[0]
-        if tag == "node":
-            n_nodes += 1
-        if tag == "edge":
-            edge_data = file.readline()
-            while edge_data.split()[0] != "]":
-                edge_tag = edge_data.split()[0]
-                if edge_tag == "source":
-                    i = int(edge_data.split()[1])-1
-                if edge_tag == "target":
-                    j = int(edge_data.split()[1])-1
-                edge_data = file.readline()
-            edges.append([i, j])
-        line = file.readline()
-    gr = np.array(np.zeros(n_nodes ** 2)).reshape(n_nodes, n_nodes)
-    for e in edges:
-        i, j = e
-        gr[i, j] = 1
-        gr[j, i] = 1
+    with open(filename, 'r') as a:
+        data = a.readlines()
+
+    for i in range(len(data)):
+        if "node [" in data[i]:
+            nodes.append(data[i+1].split()[1])
+        if "edge [" in data[i]:
+            s = int(data[i+1].split()[1])
+            t = int(data[i+2].split()[1])
+            w = int(data[i+3].split()[1].strip('"').strip("'"))
+            edges.append((s,t,w))
+
+    gr = np.array(np.zeros(len(nodes) ** 2)).reshape(len(nodes), len(nodes))
+    for i in edges:
+        gr[i[0]-1,i[1]-1] = i[2]
+        gr[i[1]-1,i[0]-1] = i[2]
+    end_time = time.time()
+    times.append((start_time,end_time))
     return matrix(gr)
+
 
 
 if __name__ == "__main__":
@@ -220,25 +226,30 @@ if __name__ == "__main__":
         print("can't combine random and file")
         exit()
 
-    root = args.root
-    # 0  1  2  3
-    #graph = matrix([[0, -1, 2, 3],
-    #                [-1, 0, 2, 1],
-    #                [2, 2, 0, 5],
-    #                [3, 1, 5, 0]])
-    #
-    #graph = random_graph(50, 100, 1, 300)
-    print(graph)
-    #print(type(graph))
+    if args.verbose:
+        verbose = True
 
-    #graph = load_graph("graph.txt")
-    #print(graph.adj)
+    root = args.root
+    
     mst = MST_PRIM(graph, root)
-    for node in mst:
-        print(node.node, node.parent)
+    if verbose:
+        print(graph)
+        print('\n')
+        for node in mst:
+            print(node.node, node.parent)
 
     gentime = times[0][1]-times[0][0]
     msttime = times[1][1]-times[1][0]
 
-    print("""Graph generation time: {} seconds
-MST calculation time: {} seconds""".format(gentime, msttime))
+    
+    if verbose:
+        print("""\nGraph generation time: {} seconds\nMST calculation time: {} seconds""".format(gentime, msttime))
+    else:
+        print(msttime)
+
+
+
+
+
+
+
