@@ -233,13 +233,17 @@ if __name__ == "__main__":
         verbose = True
 
     root = args.root
-    
+    if verbose:
+        print("________Graph________")
+        print(graph)
+        print("_________END_________")
+
     mst = MST_PRIM(graph, root)
     if verbose:
-        print(graph)
-        print('\n')
+        print("_________MST_________")
         for node in mst:
             print(node.node, node.parent)
+        print("_________END_________")
 
     gentime = times[0][1]-times[0][0]
     msttime = times[1][1]-times[1][0]
