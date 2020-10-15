@@ -1,77 +1,51 @@
-"""
-The Looping Sudoku Problem Formulation for the PuLP Modeller
+from pulp import*
 
-Authors: Antony Phillips, Dr Stuart Mitchell
-edited by Dr Nathan Sudermann-Merx
-"""
+def chess_me_a_board(choices, n):
+	#print((n-int((n/4)))*"___")
+	for i in range(n):
+		pstring = "|"
+		for x in range(n):
+			pstring += ("Q" if int(value(choices[i][x])) == 1 else " ") +"|"
+		print(pstring)
+		#print((n-int((n/4)))*"___")
 
-# Import PuLP modeler functions
-from pulp import *
+def queens_me_a_place(n):
+	ROWS = COLS = range(n)
 
-# All rows, columns and values within a Sudoku take values from 1 to 9
-ROWS = COLS = range(1, 0)
+	prob = LpProblem("8 Queens", LpMaximize)
 
 
-# The prob variable is created to contain the problem data
-prob = LpProblem("8 Queens")
+	choices = LpVariable.dicts("Fill", (ROWS, COLS),0,1, LpInteger)
+	prob += 0 ,"tests"
+	print(choices)
 
-# The decision variables are created
-choices = LpVariable.dicts("Choice", ( ROWS, COLS), cat='Binary')
+	for r in ROWS:
+	    prob += lpSum([choices[r][c] for c in COLS]) == 1, 'rows({})'.format(r)
+	    prob += lpSum([choices[c][r] for c in COLS]) == 1, 'cols({})'.format(r)
 
-# We do not define an objective function since none is needed
 
-# Constraints for rows and columns 
-for r in ROWS:
-    prob += lpSum(choices[r][c] for c in COLS <= 1, 'rows({})'.format(r))
-    prob += lpSum(choices[c][r] for c in COLS <= 1, 'cols({})'.format(r))
+	for k in range(2-n, n-1):
+		prob += lpSum([(choices[r][c] if r-c == k else None) for c in COLS]for r in ROWS) <= 1, 'dig1({})'.format(k)
 
-# Constraints for diagonals
-for k in range(2-ROWS, ROWS-2):
-    prob += lpSum([(choices[r][c] if r-c == k ) for c in COLS]for r in ROWS <= 1, '')
-
-for k in range(3-ROWS, ROWS-1):
-    prob += lpSum([(choices[r][c] if r+c == k) for c in COLS] for r in ROWS <= 1, '')
+	for k in range(1, 2*n):
+		prob += lpSum([(choices[r][c] if r+c == k else None) for c in COLS] for r in ROWS) <= 1, 'dig2({})'.format(k)
 
 
 
-# The starting numbers are entered as constraints
+	prob.writeLP("queens.lp")
 
+	solved = prob.solve()
+	if solved:
+		chess_me_a_board(choices,n)
 
-for (v, r, c) in input_data:
-    prob += choices[v][r][c] == 1
-
-# The problem data is written to an .lp file
-prob.writeLP("queens.lp")
-
-# A file called sudokuout.txt is created/overwritten for writing to
-sudokuout = open('sudokuout.txt','w')
-
-while True:
-    prob.solve()
-    # The status of the solution is printed to the screen
-    print("Status:", LpStatus[prob.status])
-    # The solution is printed if it was deemed "optimal" i.e met the constraints
-    if LpStatus[prob.status] == "Optimal":
-        # The solution is written to the sudokuout.txt file
-        for r in ROWS:
-            if r in [1, 4, 7]:
-                sudokuout.write("+-------+-------+-------+\n")
-            for c in COLS:
-                for v in VALS:
-                    if value(choices[v][r][c]) == 1:
-                        if c in [1, 4, 7]:
-                            sudokuout.write("| ")
-                        sudokuout.write(str(v) + " ")
-                        if c == 9:
-                            sudokuout.write("|\n")
-        sudokuout.write("+-------+-------+-------+\n\n")
-        # The constraint is added that the same solution cannot be returned again
-        prob += lpSum([choices[v][r][c] for v in VALS for r in ROWS for c in COLS
-                       if value(choices[v][r][c]) == 1]) <= 80
-    # If a new optimal solution cannot be found, we end the program
-    else:
-        break
-sudokuout.close()
-
-# The location of the solutions is give to the user
-print("Solutions Written to sudokuout.txt")
+if __name__ == "__main__":
+	n = input("how many squares ya want: ") 
+	if not n.isdigit():
+		print("we only take ints here")
+		exit()
+	else:
+		if int(n) > 3 :
+			queens_me_a_place(int(n))
+		else:
+			print("thats a non starter")
+			exit()
