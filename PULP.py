@@ -17,8 +17,6 @@ def queens_me_a_place(n):
 
 
 	choices = LpVariable.dicts("Fill", (ROWS, COLS),0,1, LpInteger)
-	#prob += 0 ,"tests"
-	print(choices)
 
 #constraints for columns and rows
 	for r in ROWS:
