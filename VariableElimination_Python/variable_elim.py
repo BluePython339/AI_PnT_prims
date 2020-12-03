@@ -120,23 +120,19 @@ class VariableElimination():
     def reduce_factors(self, factors, ordering):
         for obj in ordering:
             adjusters = []
-            for i in factors:
+            for index, i in enumerate(factors):
                 if obj in i[0]:
-                    adjusters.append(i)
-            for i in factors:
-                if obj in i[0]:
-                    factors.remove(i)
+                    adjusters.append(factors.pop(index))
                     print(len(factors))
             if len(adjusters) > 1:
-                #print("HERE")
                 adjusters = [self.multiply_factors(adjusters)]
 
             factors.append(self.eliminate_var(adjusters[0], obj))
             for i in factors:
                 print(i[0])
             print('_________END OF ROUND {}___________'.format(obj))
+        print("_____________FINAL_FACTORS_________________")
         for i in factors:
-            print("____________________")
             print(i[0])
             print(i[1])
             print("____________________")
