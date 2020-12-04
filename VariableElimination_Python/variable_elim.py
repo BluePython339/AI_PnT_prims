@@ -60,10 +60,6 @@ class VariableElimination():
     def multiply_2(self, obj1, obj2):
         df1 = obj1[1]
         df2 = obj2[1]
-        #size = (len(df1.columns) if len(df1.columns) > len(df2.columns) else len(df2.columns))
-        #td = [[*i, 0] for i in it.product(["False", "True"], repeat=(len(obj1[0]) if len(obj1[0]) > len(obj2[0]) else len(obj2[0])))]
-        #res = pd.DataFrame(td, columns=obj1[0]+["prob"] if len(obj1[0]) > len(obj2[0]) else obj2[0]+["prob"] )
-        #res = self.reduce_observed_single(res)
         shared = list(set(obj1[0]).intersection(obj2[0]))
         large, it_l , small, it_s = (obj1[1], obj1[0] , obj2[1], obj2[0]) if len(obj1[0]) >= len(obj2[0]) else (obj2[1], obj2[0] , obj1[1], obj1[0]) 
         res = large.copy(deep=True)
@@ -74,6 +70,7 @@ class VariableElimination():
             val1 = small.query(self.construct_query(qdata)).iloc[0]['prob']
             val2 = row['prob']
             new = val1*val2
+            #print(new)
             #print("{} * {} = {}".format(val1, val2, new))
             res.at[index, 'prob'] = new
         return [it_l, res]
@@ -117,25 +114,44 @@ class VariableElimination():
             new_f.at[index, 'prob'] = val
         return [remainders, new_f]
 
+    def normalisze_frame(self, obj):
+        df = obj[1]
+        multi_factor = 1/df['prob'].sum()
+        for index, row in df.iterrows():
+            df.at[index, 'prob'] = row['prob']*multi_factor
+        return [obj[0],df]
+
     def reduce_factors(self, factors, ordering):
         for obj in ordering:
+            rem_index = []
             adjusters = []
             for index, i in enumerate(factors):
                 if obj in i[0]:
-                    adjusters.append(factors.pop(index))
-                    print(len(factors))
+                    print("{} in {} ".format(obj, i[0]))
+                    rem_index.append(index)
+                    adjusters.append(i)
+                else:
+                    print("{} NOT in {} ".format(obj, i[0]))
+                temp = index
             if len(adjusters) > 1:
                 adjusters = [self.multiply_factors(adjusters)]
+            for index, i in enumerate(rem_index):
+                factors.pop(i-index)
 
             factors.append(self.eliminate_var(adjusters[0], obj))
-            for i in factors:
-                print(i[0])
-            print('_________END OF ROUND {}___________'.format(obj))
-        print("_____________FINAL_FACTORS_________________")
+
+        if len(factors) > 1:
+            factors = [self.multiply_factors(factors)]
+        factors = [self.normalisze_frame(i) for i in factors]
+
+                #print(i[0])
+            #print(len(factors))
+            #print('_________END OF ROUND {}___________'.format(obj))
+        #print("_____________FINAL_FACTORS_________________")
         for i in factors:
             print(i[0])
             print(i[1])
-            print("____________________")
+            #print("____________________")
         #print(factors)
 
 
@@ -145,10 +161,7 @@ class VariableElimination():
         ordering = self.classify_nodes()
         ordering.remove(query)
         print(ordering)
-        #print(ordering)
         factors = self.create_factors()
-        #print(factors[0])
-        #print(factors)
         self.reduce_factors(factors, ordering)
 
         """
